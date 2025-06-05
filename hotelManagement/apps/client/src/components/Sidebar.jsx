@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 const Sidebar = () => {
   return (
@@ -6,21 +7,21 @@ const Sidebar = () => {
       <h2 className="text-2xl font-bold mb-8 text-center">Hotel Admin</h2>
       <ul>
         <li className="mb-4">
-          <a href="#" className="text-lg hover:text-violet-400">
+          <Link to="/dashboard" className="text-lg hover:text-violet-400">
             Dashboard
-          </a>
+          </Link>
         </li>
         <li className="mb-4">
-          <a href="#" className="text-lg hover:text-violet-400">
+          <Link to="/bookings_list" className="text-lg hover:text-violet-400">
             Bookings
-          </a>
+          </Link>
         </li>
         <li className="mb-4">
-          <a href="#" className="text-lg hover:text-violet-400">
+          <Link to="/rooms" className="text-lg hover:text-violet-400">
             Rooms
-          </a>
+          </Link>
         </li>
-        <li className="mb-4">
+        {/* <li className="mb-4">
           <a href="#" className="text-lg hover:text-violet-400">
             Guests
           </a>
@@ -29,7 +30,7 @@ const Sidebar = () => {
           <a href="#" className="text-lg hover:text-violet-400">
             Reports
           </a>
-        </li>
+        </li> */}
       </ul>
     </div>
   );

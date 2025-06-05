@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { loginUser } from "../services/Auth";
+import toast from "react-hot-toast";
 
 const LoginForm = () => {
   const [email, setEmail] = useState("");
@@ -13,10 +14,11 @@ const LoginForm = () => {
       const response = await loginUser(email, password);
 
       if (response.status === "success") {
+        toast.success(response.message);
         navigate("/dashboard");
       }
     } catch (error) {
-      console.error("Login failed:", error);
+      toast.error(response.message);
     }
   };
 
@@ -83,6 +85,17 @@ const LoginForm = () => {
           <a href="#" className="text-violet-600 hover:text-violet-700 text-sm">
             Forgot Password?
           </a>
+        </div>
+        <div className="mt-4 text-center">
+          <span className="text-sm mr-2 text-gray-600">
+            Don't have an account?
+          </span>
+          <Link
+            to="/register"
+            className="text-violet-600 hover:text-violet-700 text-sm"
+          >
+            Register
+          </Link>
         </div>
       </div>
     </div>

@@ -1,25 +1,27 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { registerUser } from "../services/Auth";
+import toast from "react-hot-toast";
 
 const RegistrationForm = () => {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const [type, setType] = useState("customer");
 
   const navigate = useNavigate();
 
-  const handleRegister = async (username, email, password) => {
+  const handleRegister = async (username, email, password, type) => {
     try {
-      const response = await registerUser({ username, email, password });
+      const response = await registerUser({ username, email, password, type });
 
       if (response.status === "success") {
-        navigate("/dashboard");
+        toast.success(response.message);
+        navigate("/verify-otp");
       }
     } catch (error) {
-      console.error("Registration failed:", error);
+      toast.error(response.message);
     }
   };
 
@@ -34,15 +36,9 @@ const RegistrationForm = () => {
       setError(
         "Password must be alphanumeric with at least one special character and one uppercase letter."
       );
-      setSuccess("");
-    } else {
-      setError("");
-      setSuccess("Registration Successful!");
-
-      handleRegister(username, email, password);
-      // Optionally, handle form submission, e.g., send data to server
-      console.log("User Registered:", { username, email, password });
+      return;
     }
+    handleRegister(username, email, password, type);
   };
 
   return (
@@ -114,17 +110,56 @@ const RegistrationForm = () => {
             </div>
           )}
 
-          {/* Success Message */}
-          {success && (
-            <div className="mb-4 text-green-600 text-sm font-semibold">
-              <p>{success}</p>
+          <div className="mb-6">
+            <label
+              htmlFor="employee"
+              className="block text-violet-600 text-sm font-semibold mb-2"
+            >
+              Select User
+            </label>
+            <div className="flex items-center space-x-6">
+              {/* Employee Radio Button */}
+              <div className="flex items-center">
+                <input
+                  type="radio"
+                  id="employee"
+                  value="employee"
+                  onChange={(e) => setType(e.target.value)}
+                  checked={type === "employee"}
+                  className="h-4 w-4 text-violet-500 focus:ring-violet-500"
+                />
+                <label
+                  htmlFor="employee"
+                  className="ml-2 text-violet-600 text-sm font-medium"
+                >
+                  Employee
+                </label>
+              </div>
+
+              {/* Customer Radio Button */}
+              <div className="flex items-center">
+                <input
+                  type="radio"
+                  id="customer"
+                  value="customer"
+                  onChange={(e) => setType(e.target.value)}
+                  checked={type === "customer"}
+                  className="h-4 w-4 text-violet-500 focus:ring-violet-500"
+                />
+                <label
+                  htmlFor="customer"
+                  className="ml-2 text-violet-600 text-sm font-medium"
+                >
+                  Customer
+                </label>
+              </div>
             </div>
-          )}
+          </div>
 
           {/* Submit Button */}
           <button
             type="submit"
-            className="w-full p-3 bg-violet-600 text-white font-semibold rounded-lg hover:bg-violet-700 transition duration-300"
+            className="w-full p-3 bg-violet-600 text-white font-semibold rounded-lg hover:bg-violet-700 transition duration-300 cursor-pointer"
           >
             Register
           </button>

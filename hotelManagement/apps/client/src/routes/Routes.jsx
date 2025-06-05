@@ -1,25 +1,66 @@
 import React, { lazy, Suspense } from "react";
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  Navigate,
+} from "react-router-dom";
 const Login = lazy(() => import("../Auth/Login"));
 const Registration = lazy(() => import("../Auth/Registration"));
 const Dashboard = lazy(() => import("../pages/Dashboard"));
-const Layout = lazy(() => import("../components/Layout"));
+const Layout = lazy(() => import("../Layout/Layout"));
+const AuthGaurd = lazy(() => import("../components/AuthGaurd"));
+const VerifyOTP = lazy(() => import("../Auth/VerifyOTP"));
+const BookingList = lazy(() => import("../pages/BookingList"));
+const BookingForm = lazy(() => import("../pages/BookingForm"));
+import Cookies from "js-cookie";
 
 const ProjectRoutes = () => {
+  const token = Cookies.get("token");
   return (
     <Router>
       <Suspense fallback={<div>Loading...</div>}>
         <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Registration />} />
+          {/* <Route path="/login" element={<Login />} /> */}
           <Route
-            path="/dashboard"
-            element={
-              <Layout>
-                <Dashboard />
-              </Layout>
-            }
+            path="/login"
+            element={token ? <Navigate to="/dashboard" /> : <Login />}
           />
+          <Route
+            path="/register"
+            element={token ? <Navigate to="/dashboard" /> : <Registration />}
+          />
+          <Route
+            path="/verify-otp"
+            element={token ? <Navigate to="/dashboard" /> : <VerifyOTP />}
+          />
+
+          <Route element={<AuthGaurd />}>
+            <Route
+              path="/dashboard"
+              element={
+                <Layout>
+                  <Dashboard />
+                </Layout>
+              }
+            />
+            <Route
+              path="/bookings_list"
+              element={
+                <Layout>
+                  <BookingList />
+                </Layout>
+              }
+            />
+            <Route
+              path="/book_your_room"
+              element={
+                <Layout>
+                  <BookingForm />
+                </Layout>
+              }
+            />
+          </Route>
         </Routes>
       </Suspense>
     </Router>

@@ -1,11 +1,14 @@
 const mongoose = require("mongoose");
 
-mongoose.connect("mongodb://localhost:27017/ecommerce");
-
 const userSchema = new mongoose.Schema({
   username: String,
   email: String,
   password: String,
+  type: {
+    type: String,
+    enum: ["employee", "customer"],
+    default: "customer",
+  },
 });
 
 module.exports = mongoose.model("user", userSchema);
