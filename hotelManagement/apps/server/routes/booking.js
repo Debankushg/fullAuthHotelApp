@@ -178,7 +178,6 @@ router.get("/all-bookings", async (req, res) => {
       currentPage: Math.ceil(offsetNumber / limitNumber) + 1, // Current page
     });
   } catch (error) {
-    console.error(error); // Log the error
     res.status(500).json({ status: "error", message: "Server error" });
   }
 });
@@ -230,7 +229,6 @@ router.patch("/update-booking-status", async (req, res) => {
       booking,
     });
   } catch (error) {
-    console.error(error);
     res.status(500).json({ status: "error", message: "Server error" });
   }
 });

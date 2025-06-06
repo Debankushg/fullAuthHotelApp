@@ -21,7 +21,6 @@ const ProjectRoutes = () => {
   const user = Cookies.get("user");
   const userObject = JSON.parse(user || "{}");
   const userType = userObject?.type;
-  console.log(userType, "userObject");
 
   return (
     <Router>
