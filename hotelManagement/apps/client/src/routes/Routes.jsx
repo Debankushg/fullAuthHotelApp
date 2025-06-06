@@ -13,10 +13,16 @@ const AuthGaurd = lazy(() => import("../components/AuthGaurd"));
 const VerifyOTP = lazy(() => import("../Auth/VerifyOTP"));
 const BookingList = lazy(() => import("../pages/BookingList"));
 const BookingForm = lazy(() => import("../pages/BookingForm"));
+const EmployeeBookingList = lazy(() => import("../pages/EmployeeBookingList"));
 import Cookies from "js-cookie";
 
 const ProjectRoutes = () => {
   const token = Cookies.get("token");
+  const user = Cookies.get("user");
+  const userObject = JSON.parse(user || "{}");
+  const userType = userObject?.type;
+  console.log(userType, "userObject");
+
   return (
     <Router>
       <Suspense fallback={<div>Loading...</div>}>
@@ -48,7 +54,11 @@ const ProjectRoutes = () => {
               path="/bookings_list"
               element={
                 <Layout>
-                  <BookingList />
+                  {userType === "employee" ? (
+                    <EmployeeBookingList />
+                  ) : (
+                    <BookingList />
+                  )}
                 </Layout>
               }
             />
@@ -60,6 +70,14 @@ const ProjectRoutes = () => {
                 </Layout>
               }
             />
+            {/* <Route
+              path="/"
+              element={
+                <Layout>
+                  <BookingForm />
+                </Layout>
+              }
+            /> */}
           </Route>
         </Routes>
       </Suspense>

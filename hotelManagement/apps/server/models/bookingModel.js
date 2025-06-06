@@ -51,6 +51,10 @@ const bookingSchema = new mongoose.Schema({
     enum: ["Pending", "Confirmed", "Cancelled"], // Define the possible statuses
     default: "Pending",
   },
+  isBooked: {
+    type: Boolean,
+    default: false, // Ensure the field exists and defaults to false
+  },
 });
 
 // Create a model based on the schema

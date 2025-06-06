@@ -1,5 +1,6 @@
 import cookies from "js-cookie";
 const baseUrl = import.meta.env.VITE_BASE_URL;
+import { toast } from "react-hot-toast";
 
 export const bookYourRoom = async (roomData) => {
   const token = cookies.get("token");
@@ -31,9 +32,7 @@ export const bookYourRoom = async (roomData) => {
   }
 };
 
-export const fetchBookings = async (limit = 5, offset = 1, search = "") => {
-  console.log(limit, offset, search);
-
+export const fetchBookings = async (limit, offset, search) => {
   const token = cookies.get("token"); // Retrieve the token from cookies
   if (!token) {
     throw new Error("No token found");
@@ -73,5 +72,44 @@ export const fetchBookings = async (limit = 5, offset = 1, search = "") => {
     } else {
       throw new Error(error.message || "Network error");
     }
+  }
+};
+
+export const getAllBookings = async (limit, offset, search) => {
+  const queryParams = new URLSearchParams();
+
+  if (limit) queryParams.append("limit", limit); // Add limit if provided
+  if (offset) queryParams.append("offset", offset); // Add offset if provided
+  if (search) queryParams.append("search", search);
+  try {
+    const response = await fetch(
+      `${baseUrl}all-bookings?${queryParams.toString()}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include", // To include cookies if necessary
+      }
+    );
+    return await response.json();
+  } catch (error) {
+    toast.error(error.message);
+  }
+};
+
+export const updateBooking = async (bookingId, newStatus) => {
+  try {
+    const response = await fetch(`${baseUrl}update-booking-status`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ bookingId, newStatus }),
+      credentials: "include", // To include cookies if necessary
+    });
+    return await response.json();
+  } catch (error) {
+    toast.error(error.message);
   }
 };
