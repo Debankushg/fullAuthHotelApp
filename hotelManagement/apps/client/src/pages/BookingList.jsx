@@ -4,14 +4,23 @@ import { toast } from "react-hot-toast";
 import { fetchBookings } from "../services/Booking";
 import Pagination from "../components/Pagination";
 import { convertToDateTime } from "../utils/timeConversion";
+import PaymentModal from "../components/PaymentModal";
+import { Elements } from "@stripe/react-stripe-js";
+import { loadStripe } from "@stripe/stripe-js";
 
 const BookingTable = () => {
   const navigate = useNavigate();
   const [bookings, setBookings] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [paymentModalShow, setPaymentModalShow] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState(null);
   const [limit, setLimit] = useState(4);
   const [page, setPage] = useState(0);
   const [total, setTotal] = useState(0);
+
+  const stripePromise = loadStripe(
+    import.meta.env.VITE_API_STRIPE_PUBLISHABLE_KEY
+  );
 
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
@@ -24,7 +33,7 @@ const BookingTable = () => {
   const fetchBookingList = async (limit, page, searchQuery) => {
     try {
       const response = await fetchBookings(limit, page, searchQuery);
-      setBookings(response.bookings);
+      setBookings(response.bookingsWithAmount);
       setTotal(response.totalBookings);
     } catch (error) {
       toast.error(error.message);
@@ -34,6 +43,20 @@ const BookingTable = () => {
   useEffect(() => {
     fetchBookingList(limit, page, searchQuery);
   }, [limit, page]);
+
+  const handlePayments = (booked) => {
+    setPaymentModalShow(true);
+    console.log(booked, "BOOK");
+    const { userId, roomType, amount } = booked;
+    setSelectedBooking({
+      userId,
+      roomType,
+      amount,
+    });
+  };
+
+  console.log(bookings, ">>>>>>>>>>>>BOOKINGS");
+
   return (
     <div className="min-h-[89.5vh] bg-gradient-to-r from-purple-300 via-indigo-400 to-blue-300 p-8">
       <div className="flex justify-between">
@@ -68,10 +91,11 @@ const BookingTable = () => {
               Check-out Date & Time
             </th>
             <th className="px-4 py-3 text-left text-sm">Status</th>
+            <th className="px-4 py-3 text-left text-sm">Action</th>
           </tr>
         </thead>
         <tbody>
-          {bookings.map((booking, index) => (
+          {bookings?.map((booking, index) => (
             <tr key={index} className="border-t">
               <td className="px-4 py-2 text-sm">{booking.name}</td>
               <td className="px-4 py-2 text-sm">{booking.email}</td>
@@ -96,6 +120,15 @@ const BookingTable = () => {
                   {booking.status}
                 </span>
               </td>
+              <td className="px-4 py-2 text-sm">
+                <button
+                  className={`px-3 py-2 w-[100px] text-white rounded-lg ${booking.isBooked ? "cursor-pointer  bg-violet-700" : "cursor-not-allowed bg-violet-300"} `}
+                  onClick={() => handlePayments(booking)}
+                  disabled={!booking.isBooked}
+                >
+                  Book Room {booking.amount ? `(${booking.amount})` : ""}
+                </button>
+              </td>
             </tr>
           ))}
         </tbody>
@@ -107,6 +140,13 @@ const BookingTable = () => {
         onPageChange={setPage}
         onLimitChange={setLimit}
       />
+      <Elements stripe={stripePromise}>
+        <PaymentModal
+          paymentModalShow={paymentModalShow}
+          setPaymentModalShow={setPaymentModalShow}
+          selectedRoom={selectedBooking}
+        />
+      </Elements>
     </div>
   );
 };
