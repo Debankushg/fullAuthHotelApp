@@ -5,6 +5,7 @@ const app = express();
 const path = require("path");
 const userAuth = require("./routes/user"); // Ensure this is correct
 const bookingRooms = require("./routes/booking"); // Ensure this is correct
+const paymentsRooms = require("./routes/stripe");
 const cors = require("cors");
 const session = require("express-session");
 
@@ -36,6 +37,7 @@ mongoose
 // Define routes for user authentication and booking
 app.use("/", userAuth);
 app.use("/", bookingRooms);
+app.use("/", paymentsRooms);
 
 app.listen(3000, () => {
   console.log("Server is running on port 3000");

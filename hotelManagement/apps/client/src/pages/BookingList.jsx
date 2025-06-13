@@ -33,7 +33,7 @@ const BookingTable = () => {
   const fetchBookingList = async (limit, page, searchQuery) => {
     try {
       const response = await fetchBookings(limit, page, searchQuery);
-      setBookings(response.bookingsWithAmount);
+      setBookings(response.bookings);
       setTotal(response.totalBookings);
     } catch (error) {
       toast.error(error.message);

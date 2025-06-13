@@ -121,12 +121,28 @@ router.get("/booking-rooms", async (req, res) => {
       .populate("userId")
       .lean();
 
+    const roomPrices = {
+      standardRoom: 1000,
+      deluxeSuite: 2000,
+      singleRoom: 800,
+      doubleRoom: 1200,
+      tripleRoom: 1500,
+      quadRoom: 1800,
+      queenRoom: 1600,
+      kingRoom: 1800,
+    };
+
+    const bookingsWithAmount = bookings.map((booking) => ({
+      ...booking,
+      amount: roomPrices[booking.roomType] || 0,
+    }));
+
     // Get the total count of bookings for pagination
     const totalBookings = await bookingModel.countDocuments(searchQuery); // Count based on the filtered query
 
     res.status(200).json({
       status: "success",
-      bookings,
+      bookings: bookingsWithAmount,
       totalBookings, // Total number of bookings for pagination
       totalPages: Math.ceil(totalBookings / limitNumber), // Calculate total pages
       currentPage: Math.ceil(offsetNumber / limitNumber) + 0, // Current page based on offset

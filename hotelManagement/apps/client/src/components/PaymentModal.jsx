@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FaCreditCard } from "react-icons/fa";
 import {
   CardNumberElement,
@@ -7,7 +7,7 @@ import {
   CardExpiryElement,
   CardCvcElement,
 } from "@stripe/react-stripe-js";
-import { roomBookPayment } from "../services/Payment";
+import { createPaymentIntent, handlePayment } from "../services/Payment";
 import { toast } from "react-hot-toast";
 
 const PaymentModal = ({
@@ -16,9 +16,11 @@ const PaymentModal = ({
   selectedRoom,
 }) => {
   const [loading, setLoading] = useState(false);
+  const [paymentStatus, setPaymentStatus] = useState(null);
   const stripe = useStripe();
   const elements = useElements();
 
+  // Card element styles
   const CARD_ELEMENT_OPTIONS = {
     style: {
       base: {
@@ -33,16 +35,86 @@ const PaymentModal = ({
       },
     },
   };
+
+  // Close modal if it's not showing
   if (!paymentModalShow) return null;
 
-  const handlePayment = async (event) => {
+  // const initiatePayment = async (event) => {
+  //   event.preventDefault();
+
+  //   if (!stripe || !elements) {
+  //     toast.error("Stripe is not loaded");
+  //     return;
+  //   }
+
+  //   setLoading(true);
+  //   const cardElement = elements.getElement(CardNumberElement);
+
+  //   if (!cardElement) {
+  //     toast.error("Payment card element not found");
+  //     setLoading(false);
+  //     return;
+  //   }
+
+  //   const data = {
+  //     userId: selectedRoom?.userId?._id,
+  //     amount: selectedRoom?.amount,
+  //     roomType: selectedRoom?.roomType,
+  //   };
+
+  //   try {
+  //     // Step 1: Create PaymentIntent to get clientSecret
+  //     const response = await createPaymentIntent(
+  //       data.amount,
+  //       data.roomType,
+  //       data.userId
+  //     );
+  //     console.log(response, ">>>>>>>>>>>>>>>>>>response");
+
+  //     if (response) {
+  //       // Step 2: Confirm the payment with clientSecret and card details
+  //       const paymentIntent = await handlePayment(response, {
+  //         payment_method: {
+  //           card: cardElement,
+  //         },
+  //       });
+  //       console.log(paymentIntent, ">>>>>>>>>>>>>>>>>>paymentIntent");
+  //       console.log(response, ">>>>>>>>>>>>>>>>>>response");
+
+  //       if (paymentIntent.status === "succeeded") {
+  //         setPaymentStatus("Payment Successful!");
+  //         toast.success("Payment Successful!");
+  //         setPaymentModalShow(false); // Close the modal on success
+  //       } else {
+  //         console.error(paymentIntent.error);
+  //         setPaymentStatus("Payment failed: " + paymentIntent.error.message);
+  //         toast.error("Payment failed: " + paymentIntent.error.message);
+  //       }
+  //     } else {
+  //       console.error(response);
+  //       setPaymentStatus(response.message);
+  //       toast.error(response.message);
+  //     }
+  //   } catch (error) {
+  //     console.error(error);
+  //     setPaymentStatus("Payment failed: " + error.message);
+  //     toast.error("Payment failed: " + error.message);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+  const initiatePayment = async (event) => {
     event.preventDefault();
+
     if (!stripe || !elements) {
       toast.error("Stripe is not loaded");
       return;
     }
 
     setLoading(true);
+
+    // Get the card element
     const cardElement = elements.getElement(CardNumberElement);
 
     if (!cardElement) {
@@ -54,16 +126,47 @@ const PaymentModal = ({
     const data = {
       userId: selectedRoom?.userId?._id,
       amount: selectedRoom?.amount,
+      roomType: selectedRoom?.roomType,
     };
 
-    const response = await roomBookPayment(data);
-    if (response.success) {
-      toast.success(response.message);
-      setPaymentModalShow(false);
-    } else {
-      toast.error(response.message);
+    try {
+      // Step 1: Create PaymentIntent to get clientSecret
+      const response = await createPaymentIntent(
+        data.amount,
+        data.roomType,
+        data.userId
+      );
+
+      if (response.success) {
+        // Step 2: Confirm the payment with clientSecret and card details
+        const paymentIntent = await stripe.confirmCardPayment(
+          response.clientSecret,
+          {
+            payment_method: {
+              card: cardElement,
+            },
+          }
+        );
+
+        if (paymentIntent.status === "succeeded") {
+          setPaymentStatus("Payment Successful!");
+          toast.success("Payment Successful!");
+          setPaymentModalShow(false); // Close the modal on success
+        } else {
+          setPaymentStatus("Payment failed: " + paymentIntent.error.message);
+          toast.error("Payment failed: " + paymentIntent.error.message);
+        }
+      } else {
+        setPaymentStatus(response.message);
+        toast.error(response.message);
+      }
+    } catch (error) {
+      console.error(error.message); // Log only the message to avoid circular structures
+      setPaymentStatus("Payment failed: " + error.message);
+      toast.error("Payment failed: " + error.message);
+    } finally {
+      setLoading(false);
     }
-    console.log(data, "BOOKING DATA");
   };
 
   return (
@@ -98,7 +201,7 @@ const PaymentModal = ({
         </div>
 
         {/* Payment Form */}
-        <form onSubmit={handlePayment}>
+        <form onSubmit={initiatePayment}>
           {/* Card Number Field */}
           <div className="mb-5 text-left">
             <label
@@ -107,7 +210,7 @@ const PaymentModal = ({
             >
               Card Number
             </label>
-            <div className="flex items-center border border-gray-300 rounded-md p-2">
+            <div className="border border-gray-300 rounded-md p-2">
               <CardNumberElement
                 id="card-number"
                 options={CARD_ELEMENT_OPTIONS}
@@ -155,9 +258,7 @@ const PaymentModal = ({
                   className="spinner-border text-light mr-3"
                   style={{ width: "1.2rem", height: "1.2rem" }}
                   role="status"
-                >
-                  {/* <span className="visually-hidden">Loading...</span> */}
-                </div>
+                ></div>
                 Processing...
               </>
             ) : (
@@ -165,6 +266,7 @@ const PaymentModal = ({
             )}
           </button>
         </form>
+        {paymentStatus && <p className="mt-3 text-center">{paymentStatus}</p>}
       </div>
     </div>
   );
