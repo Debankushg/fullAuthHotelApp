@@ -14,6 +14,8 @@ const VerifyOTP = lazy(() => import("../Auth/VerifyOTP"));
 const BookingList = lazy(() => import("../pages/BookingList"));
 const BookingForm = lazy(() => import("../pages/BookingForm"));
 const EmployeeBookingList = lazy(() => import("../pages/EmployeeBookingList"));
+const RoomsList = lazy(() => import("../pages/Rooms"));
+const UploadRooms = lazy(() => import("../pages/UploadRooms"));
 import Cookies from "js-cookie";
 
 const ProjectRoutes = () => {
@@ -69,14 +71,22 @@ const ProjectRoutes = () => {
                 </Layout>
               }
             />
-            {/* <Route
-              path="/"
+            <Route
+              path="/rooms"
               element={
                 <Layout>
-                  <BookingForm />
+                  <RoomsList />
                 </Layout>
               }
-            /> */}
+            />
+            <Route
+              path="/upload_rooms"
+              element={
+                <Layout>
+                  <UploadRooms />
+                </Layout>
+              }
+            />
           </Route>
         </Routes>
       </Suspense>

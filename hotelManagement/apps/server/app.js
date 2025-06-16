@@ -8,6 +8,7 @@ const bookingRooms = require("./routes/booking"); // Ensure this is correct
 const paymentsRooms = require("./routes/stripe");
 const cors = require("cors");
 const session = require("express-session");
+app.use("/photos", express.static(path.join(__dirname, "photos")));
 
 app.use(
   session({
