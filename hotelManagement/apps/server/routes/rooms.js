@@ -2,6 +2,7 @@ const express = require("express");
 const multer = require("multer");
 const router = express.Router();
 const Rooms = require("../models/roomModel");
+const Booking = require("../models/bookingModel");
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -88,6 +89,107 @@ router.get("/all-rooms", async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });
+  }
+});
+
+router.get("/dashboard", async (req, res) => {
+  try {
+    const bookings = await Booking.aggregate([
+      {
+        $lookup: {
+          from: "rooms", // Join the Rooms collection
+          localField: "roomType", // Room type in Booking schema
+          foreignField: "_id", // Match by the _id field in Rooms
+          as: "roomDetails", // Alias for joined data
+        },
+      },
+      {
+        $lookup: {
+          from: "payments", // Join the Payment collection
+          localField: "userId", // UserId in Booking schema
+          foreignField: "userId", // Match by userId in Payment collection
+          as: "paymentDetails", // Alias for joined data
+        },
+      },
+      {
+        $unwind: {
+          path: "$roomDetails", // Unwind roomDetails array
+          preserveNullAndEmptyArrays: true, // Retain bookings even without matching rooms
+        },
+      },
+      {
+        $unwind: {
+          path: "$paymentDetails", // Unwind paymentDetails array
+          preserveNullAndEmptyArrays: true, // Retain bookings even without payments
+        },
+      },
+      {
+        $project: {
+          name: 1,
+          email: 1,
+          phoneNo: 1,
+          address: 1,
+          status: 1,
+          roomType: 1,
+          roomCount: 1,
+          personCount: 1,
+          paymentAmount: "$paymentDetails.amount",
+        },
+      },
+      {
+        $group: {
+          _id: "$_id", // Group by the unique booking _id to keep individual bookings
+          name: { $first: "$name" },
+          email: { $first: "$email" },
+          phoneNo: { $first: "$phoneNo" },
+          address: { $first: "$address" },
+          status: { $first: "$status" },
+          roomType: { $first: "$roomType" },
+          roomCount: { $sum: "$roomCount" }, // Sum of room counts for this booking
+          personCount: { $sum: "$personCount" }, // Sum of person counts for this booking
+          totalAmountBooked: { $sum: "$paymentAmount" }, // Sum of payment amounts for this booking
+        },
+      },
+    ]);
+
+    if (!bookings || bookings.length === 0) {
+      return res.status(200).json({
+        status: "success",
+        message: "No bookings found.",
+        totalAmountBooked: 0,
+        totalRoomBooked: 0,
+        totalPersonCount: 0,
+        bookings: [],
+      });
+    }
+
+    // Calculate the totals after fetching all bookings
+    const totalAmountBooked = bookings.reduce(
+      (acc, booking) => acc + booking.totalAmountBooked,
+      0
+    );
+    const totalRoomBooked = bookings.reduce(
+      (acc, booking) => acc + booking.roomCount,
+      0
+    );
+    const totalPersonCount = bookings.reduce(
+      (acc, booking) => acc + booking.personCount,
+      0
+    );
+
+    return res.status(200).json({
+      status: "success",
+      totalAmountBooked,
+      totalRoomBooked,
+      totalPersonCount,
+      bookings,
+    });
+  } catch (error) {
+    console.error("Error while fetching bookings:", error);
+    return res.status(500).json({
+      status: "error",
+      message: "An error occurred while fetching bookings.",
+    });
   }
 });
 

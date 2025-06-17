@@ -47,3 +47,12 @@ export const verifyOTP = (otp) => {
     .then((response) => response.json())
     .catch((error) => console.error(error));
 };
+
+export const getDashboardData = () => {
+  return fetch(`${baseUrl}dashboard`, {
+    method: "GET",
+    credentials: "include",
+  })
+    .then((response) => response.json())
+    .catch((error) => console.error(error));
+};
