@@ -1,26 +1,56 @@
 import React, { useState } from "react";
+import { uploadRooms } from "../services/Rooms";
+import { toast } from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 const UploadForm = () => {
   const [name, setName] = useState("");
   const [images, setImages] = useState([]);
+  const [image, setImage] = useState(null);
   const [price, setPrice] = useState("");
   const [ratings, setRatings] = useState("");
+  const navigate = useNavigate();
 
   // Handle image selection and preview
   const handleImageChange = (e) => {
     const selectedFiles = Array.from(e.target.files).map((file) =>
       URL.createObjectURL(file)
     );
+    setImage(e.target.files[0]);
     setImages(selectedFiles);
+  };
+
+  const saveRooms = async (data) => {
+    const response = await uploadRooms(data);
+    if (response.status === "success") {
+      toast.success(response.message);
+      navigate("/rooms");
+      setName("");
+      setImages([]);
+      setPrice("");
+      setRatings("");
+    } else {
+      toast.error(response.message);
+    }
+    console.log(response);
   };
 
   // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Name:", name);
-    console.log("Images:", images);
-    console.log("Price:", price);
-    console.log("Ratings:", ratings);
+    console.log(name, image, price, ratings);
+
+    if (!image) {
+      toast.error("Image is required!");
+      return;
+    }
+
+    const data = new FormData();
+    data.append("name", name);
+    data.append("image", image);
+    data.append("price", price);
+    data.append("ratings", ratings);
+    saveRooms(data);
   };
 
   return (
@@ -123,7 +153,7 @@ const UploadForm = () => {
           {/* Submit Button */}
           <button
             type="submit"
-            className="w-full py-3 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition duration-300"
+            className="w-full py-3 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition duration-300 cursor-pointer"
           >
             Upload Product
           </button>

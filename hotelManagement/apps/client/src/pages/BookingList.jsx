@@ -55,8 +55,6 @@ const BookingTable = () => {
     });
   };
 
-  console.log(bookings, ">>>>>>>>>>>>BOOKINGS");
-
   return (
     <div className="min-h-[89.5vh] bg-gradient-to-r from-purple-300 via-indigo-400 to-blue-300 p-8">
       <div className="flex justify-between">

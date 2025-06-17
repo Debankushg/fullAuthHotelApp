@@ -15,7 +15,7 @@ const SideNavHeader = () => {
   const handleLogout = async () => {
     const res = await logoutUser();
     if (res.status === "success") {
-      navigate("/login", { replace: true });
+      navigate("/login");
     }
   };
 
@@ -46,7 +46,7 @@ const SideNavHeader = () => {
             <button
               type="button"
               onClick={handleLogout}
-              className="bg-indigo-500 hover:bg-indigo-600 text-white py-2 px-4 rounded"
+              className="bg-indigo-500 hover:bg-indigo-600 text-white py-2 px-4 rounded cursor-pointer"
             >
               Logout
             </button>

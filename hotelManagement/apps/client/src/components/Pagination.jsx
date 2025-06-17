@@ -23,13 +23,13 @@ function Pagination({ limit, offset, total, onPageChange, onLimitChange }) {
           onLimitChange(Number(e.target.value));
           onPageChange(0); // reset to first page on limit change
         }}
-        className="border border-violet-300 hover:bg-violet-800 text-white font-bold py-1 px-4 rounded cursor-pointer "
+        className="border border-violet-100 hover:bg-violet-900 text-white font-bold py-1 px-4 rounded cursor-pointer bg-violet-950 "
       >
         {[4, 10, 20, 50].map((size) => (
           <option
             key={size}
             value={size}
-            className=" cursor-pointer bg-violet-500"
+            className=" cursor-pointer bg-violet-900"
           >
             Show {size}
           </option>
@@ -40,7 +40,7 @@ function Pagination({ limit, offset, total, onPageChange, onLimitChange }) {
         <button
           onClick={() => handlePageChange(currentPage - 1)}
           disabled={currentPage === 1}
-          className="bg-violet-500 hover:bg-violet-700 text-white font-bold py-1 px-4 rounded cursor-pointer"
+          className="bg-violet-900 hover:bg-violet-700 text-white font-bold py-1 px-4 rounded cursor-pointer"
         >
           Prev
         </button>
@@ -51,10 +51,10 @@ function Pagination({ limit, offset, total, onPageChange, onLimitChange }) {
             onClick={() => handlePageChange(page)}
             style={{
               fontWeight: page === currentPage ? "bold" : "normal",
-              backgroundColor: page === currentPage ? "" : "transparent",
+              backgroundColor: page === currentPage ? "" : "#2f0d68",
             }}
             className={`${
-              page === currentPage ? "bg-violet-500" : "bg-transparent"
+              page === currentPage ? "bg-violet-950" : "bg-violet-900"
             } hover:bg-violet-700 text-white font-bold py-1 px-4 rounded-3xl cursor-pointer`}
           >
             {page}
@@ -64,7 +64,7 @@ function Pagination({ limit, offset, total, onPageChange, onLimitChange }) {
         <button
           onClick={() => handlePageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
-          className="bg-violet-500 hover:bg-violet-700 text-white font-bold py-1 px-4 rounded cursor-pointer"
+          className="bg-violet-900 hover:bg-violet-700 text-white font-bold py-1 px-4 rounded cursor-pointer"
         >
           Next
         </button>

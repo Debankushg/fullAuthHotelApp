@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { FaCreditCard } from "react-icons/fa";
 import {
   CardNumberElement,
